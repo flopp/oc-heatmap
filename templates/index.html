@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Opencaching.de - Heatmap aller @COUNT@ aktiven Caches (Stand: @DATE@)</title>
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.1.0/leaflet.css" integrity="sha256-5piEyhaG15nC4xz3JkR5cXmYqv7nWig0wO73EFNL/nw=" crossorigin="anonymous" />
+        <style>
+            html, body { height: 100%; overflow: hidden}
+            #wrapper { position: absolute; left: 0; right: 0; top: 0; bottom: 30px; float: left; }
+            #map { width: 100%; height: 100%;}
+            #footer {position: absolute; left: 0; right: 0; height: 30px; bottom: 0px; float: left; }
+            #footer-inner { text-align: center; padding: 4px; font-size: small; }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="map"></div>
+        </div>
+        <div id="footer">
+            <div id="footer-inner">
+                Ein Projekt von <a href="http://blog.flopp-caching.de/">Flopp</a>. Die Heatmap zeigt die @COUNT@ aktiven Geocaches von <a href="https://www.opencacing.de/">Opencaching.de</a> (Stand: @DATE@).
+            </div>
+        </div>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.1.0/leaflet.js" integrity="sha256-tjeCw1yzCBwiuZUrMPC89d0i82fR7Ij2O1OEo8cEMGw=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js" integrity="sha256-65UqrlgGoRAnKfKRuriH3eeDrOhZgZo1SCenduc+SGo=" crossorigin="anonymous"></script>
+        <script src='data.js'></script>
+        <script>
+var map = L.map('map').setView([51.22, 9.36], 6);
+var tiles = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+    attribution: 'Map &copy; Carto [CC BY 3.0], Data &copy; OSM and contributors, ODbL.',
+}).addTo(map);
+var heat = L.heatLayer(data, {radius: 25, maxZoom: 10}).addTo(map);
+        </script>
+    </body>
+</html>
