@@ -5,10 +5,9 @@ Demo at https://www.flopp.net/heatmap/
 
 ## Usage:
 
-    ./oc-heatmap.py --verbose --datadir /tmp/oc-heatmap-data --outputdir heatmap
+    ./oc-heatmap.py --verbose --outputdir heatmap
 
-Creates a js/html based heatmap in the output directory `heatmap`. Intermediate data (downloads, etc.)
-is stored in `/tmp/oc-heatmap-data`.
+Creates a js/html based heatmap in the output directory `heatmap`.
 
 ## License:
 

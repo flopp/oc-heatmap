@@ -11,13 +11,15 @@
 
 import logging
 import os
+import shutil
+import tempfile
 
 
 class OCHeatmapGenerator:
     url = 'http://www.opencaching.de/xml/ocxml15.php'
 
     def __init__(self):
-        self.data_dir = 'data'
+        self.temp_dir = None
         self.output_dir = 'out'
         self.log = logging.getLogger('oc-heatmap')
         self.log.setLevel(logging.ERROR)
@@ -33,9 +35,6 @@ class OCHeatmapGenerator:
 
     def set_output_dir(self, d):
         self.output_dir = d
-
-    def set_data_dir(self, d):
-        self.data_dir = d
 
     def set_verbose(self, v):
         if v:
@@ -66,7 +65,7 @@ class OCHeatmapGenerator:
         from xml.dom import minidom
         import time
         import math
-        target_file_name = '{}/index.xml'.format(self.data_dir)
+        target_file_name = '{}/index.xml'.format(self.temp_dir)
         earliest_time = '20050801000000'
         self._download('{}?modifiedsince={}&cache=1'.format(self.url, earliest_time), target_file_name)
         self.time_stamp = time.localtime(os.path.getmtime(target_file_name))
@@ -80,7 +79,7 @@ class OCHeatmapGenerator:
     def _process_file(self, file_index):
         from xml.dom import minidom
         import gzip
-        target_file_name = '{}/file{}.xml.gz'.format(self.data_dir, file_index)
+        target_file_name = '{}/file{}.xml.gz'.format(self.temp_dir, file_index)
         self._download('{}?sessionid={}&file={}&charset=utf-8&cdata=1&xmldecl=1&ocxmltag=1&doctype=0&zip=gzip'
                        .format(self.url, self.session_id, file_index), target_file_name)
         if os.path.getsize(target_file_name) < 100:
@@ -136,16 +135,19 @@ class OCHeatmapGenerator:
             self.log.info('creating dir: {}'.format(dir_name))
             os.mkdir(dir_name)
 
-    def run(self):
-        self.log.info('using data dir: {}'.format(self.data_dir))
+    def run(self, keeptempdir):
+        self.temp_dir = tempfile.mkdtemp(prefix='oc-heatmap-')
+        self.log.info('using temp dir: {}'.format(self.temp_dir))
         self.log.info('using output dir: {}'.format(self.output_dir))
-        self._ensure_dir(self.data_dir)
         self._ensure_dir(self.output_dir)
         self._process_index()
         for file_index in range(1, self.files + 1):
             self._process_file(file_index)
         self._write_index_file()
         self._write_data_file()
+        if not keeptempdir:
+            self.log.info('deleting temp dir: {}'.format(self.temp_dir))
+            shutil.rmtree(self.temp_dir)
 
 
 if __name__ == '__main__':
@@ -153,12 +155,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', help='verbose output', action='store_true')
-    parser.add_argument('-d', '--datadir', help='select data dir', type=str, default='data')
+    parser.add_argument('-k', '--keeptempdir', help='don\'t delete the temp dir', action='store_true')
     parser.add_argument('-o', '--outputdir', help='select output dir', type=str, default='out')
     args = parser.parse_args()
 
     gen = OCHeatmapGenerator()
-    gen.set_data_dir(args.datadir)
     gen.set_output_dir(args.outputdir)
     gen.set_verbose(args.verbose)
-    gen.run()
+    gen.run(args.keeptempdir)
