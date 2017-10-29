@@ -112,13 +112,13 @@ class OCHeatmapGenerator:
         self.log.info('creating file: {}'.format(target_file_name))
         with open(target_file_name, 'w') as f:
             f.write('var data = [\n')
-            maxv = 0
+            max_v = 0
             for k, v in self.grid.items():
-                if v > maxv:
-                    maxv = v
+                if v > max_v:
+                    max_v = v
             for k, v in self.grid.items():
                 lat_lon = k.split('/')
-                f.write('[{}, {}, {}],\n'.format(lat_lon[0], lat_lon[1], v/float(maxv)))
+                f.write('[{}, {}, {}],\n'.format(lat_lon[0], lat_lon[1], v/float(max_v)))
             f.write('];\n')
 
     def _write_index_file(self):
@@ -128,7 +128,7 @@ class OCHeatmapGenerator:
         with open('templates/index.html', 'r') as f_in, open(target_file_name, 'w') as f_out:
             data = f_in.read()\
                 .replace('@COUNT@', '{}'.format(self.cache_count))\
-                .replace('@DATE@', time.strftime('%m/%Y', self.time_stamp))
+                .replace('@DATE@', time.strftime('%Y-%m-%d', self.time_stamp))
             f_out.write(data)
 
     def _ensure_dir(self, dir_name):
