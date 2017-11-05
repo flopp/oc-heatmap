@@ -1,5 +1,5 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/flopp/oc-heatmap/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/flopp/oc-heatmap/?branch=master)
-![License MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)]
+![License MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)
 
 # oc-heatmap
 Create a js/html based heatmap for active geocaches of https://www.opencaching.de/

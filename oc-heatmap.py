@@ -67,7 +67,7 @@ class OCHeatmapGenerator:
         from xml.dom import minidom
         import time
         import math
-        target_file_name = '{}/index.xml'.format(self.temp_dir)
+        target_file_name = os.path.join(self.temp_dir, 'index.xml')
         earliest_time = '20050801000000'
         self._download('{}?modifiedsince={}&cache=1'.format(self.url, earliest_time), target_file_name)
         self.time_stamp = time.localtime(os.path.getmtime(target_file_name))
@@ -93,20 +93,24 @@ class OCHeatmapGenerator:
             xml = minidom.parse(f)
             for cache in xml.getElementsByTagName('cache'):
                 caches += 1
-                status_el = cache.getElementsByTagName('status')[0]
-                status_id = status_el.attributes['id'].value
-                if status_id != '1':
-                    continue
-                added += 1
-                lat = float(self._get_text(cache.getElementsByTagName('latitude')[0].childNodes))
-                lon = float(self._get_text(cache.getElementsByTagName('longitude')[0].childNodes))
-                key = '{:.2f}/{:.2f}'.format(lat, lon)
-                if key in self.grid:
-                    self.grid[key] += 1
-                else:
-                    self.grid[key] = 1
-                self.cache_count += 1
+                if self._process_cache(cache):
+                    added += 1
             self.log.info('added caches: {}/{}'.format(added, caches))
+
+    def _process_cache(self, cache_xml):
+        status_el = cache_xml.getElementsByTagName('status')[0]
+        status_id = status_el.attributes['id'].value
+        if status_id != '1':
+            return False
+        lat = float(self._get_text(cache_xml.getElementsByTagName('latitude')[0].childNodes))
+        lon = float(self._get_text(cache_xml.getElementsByTagName('longitude')[0].childNodes))
+        key = '{:.2f}/{:.2f}'.format(lat, lon)
+        if key in self.grid:
+            self.grid[key] += 1
+        else:
+            self.grid[key] = 1
+        self.cache_count += 1
+        return True
 
     def _write_data_file(self):
         target_file_name = '{}/data.js'.format(self.output_dir)
