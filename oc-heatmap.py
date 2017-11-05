@@ -12,6 +12,7 @@
 import logging
 import os
 import shutil
+import sys
 import tempfile
 
 
@@ -21,6 +22,7 @@ class OCHeatmapGenerator:
     def __init__(self):
         self.temp_dir = None
         self.output_dir = 'out'
+        self.base_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.log = logging.getLogger('oc-heatmap')
         self.log.setLevel(logging.ERROR)
         ch = logging.StreamHandler()
@@ -124,7 +126,9 @@ class OCHeatmapGenerator:
         import time
         target_file_name = '{}/index.html'.format(self.output_dir)
         self.log.info('creating file: {}'.format(target_file_name))
-        with open('templates/index.html', 'r') as f_in, open(target_file_name, 'w') as f_out:
+        template = os.path.join(self.base_dir, 'templates', 'index.html')
+        self.log.info('processing template file: {}'.format(template))
+        with open(template, 'r') as f_in, open(target_file_name, 'w') as f_out:
             data = f_in.read()\
                 .replace('@COUNT@', '{}'.format(self.cache_count))\
                 .replace('@DATE@', time.strftime('%Y-%m-%d', self.time_stamp))
@@ -142,6 +146,7 @@ class OCHeatmapGenerator:
         self._ensure_dir(self.output_dir)
         self._process_index()
         for file_index in range(1, self.files + 1):
+            self.log.info('file {}/{}'.format(file_index, self.files))
             self._process_file(file_index)
         self._write_index_file()
         self._write_data_file()
